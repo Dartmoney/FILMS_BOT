@@ -4,7 +4,7 @@ import random
 import sqlite3
 from seleniumwire import webdriver  # Import from seleniumwire
 from selenium.webdriver.chrome.options import Options
-
+import time
 db = sqlite3.connect("Triangle_Kino.db")
 cur = db.cursor()
 
@@ -33,58 +33,65 @@ headers = {'User-Agent': user_agent}
 x = 1
 
 url = "http://hdrezkabbsm2k.net/?filter=last&genre=1"
-req = list()
 while True:
-    i = 0
-    page = BeautifulSoup(requests.get(url, headers=headers).text, "lxml")
+    try:
+        i = 0
+        time.sleep(0.01)
+        req = []
+        page = BeautifulSoup(requests.get(url, headers=headers).text, "lxml")
+        name_list = []
+        link1_list = []
+        opisanie_list = []
+        for name in page.find_all("div", class_="b-content__inline_item-link"):
+            name_text = name.text
+            url = name.find_all('a')[0].get("href")
+            print(name_text)
+            print(url)
+            link1_list.append(url)
+            name_list.append(name_text)
 
-    name_list = []
-    link1_list = []
-    opisanie_list = []
-    for name in page.find_all("div", class_="b-content__inline_item-link"):
-        name_text = name.text
-        url = name.find_all('a')[0].get("href")
-        print(name_text)
-        print(url)
-        link1_list.append(url)
-        name_list.append(name_text)
+        for link0 in link1_list:
+            time.sleep(0.01)
+            page2 = BeautifulSoup(requests.get(link0, headers=headers).text, "lxml")
+            opisanie = page2.find("div", class_="b-post__description_text").text
 
-    for link0 in link1_list:
-        page2 = BeautifulSoup(requests.get(link0, headers=headers).text, "lxml")
-        opisanie = page2.find("div", class_="b-post__description_text").text
+            print(opisanie)
 
-        print(opisanie)
-
-        options = Options()
-        options.add_argument("--headless")
-
-        driver = webdriver.Chrome(options=options)
+            options = Options()
+            options.add_argument("--headless")
+            time.sleep(0.01)
+            driver = webdriver.Chrome(options=options,executable_path="home/dartmoney/MY_BOT/FILMS_BOT/chromedriver")
 
         # Go to the Google home page
-        driver.get(link0)
+            driver.get(link0)
         # Access requests via the `requests` attribute
-        for request in driver.requests:
-            if request.response:
-                if "http://stream.voidboost.cc/" in request.url:
-                    req.append(
-                        request.url
-                    )
+            for request in driver.requests:
+                if request.response:
+                    if "http://stream.voidboost.cc/" in request.url:
+                        req.append(
+                            request.url
+                        )
 
-        opisanie_list.append(opisanie)
-    while i < len(opisanie_list):
-        name1 = name_list[i]
-        opisanie1 = opisanie_list[i]
-        link2 = req[i]
+            opisanie_list.append(opisanie)
+        while i < len(opisanie_list):
+            name1 = name_list[i]
+            opisanie1 = opisanie_list[i]
+            link2 = req[i]
 
-        cur.execute("""INSERT INTO Triangle_Kino (RESURS, NAME, OPISANIE, LINK_STR) VALUES (?, ?, ?, ?);""",
-                    (resursZERO, name1, opisanie1, link2))
-        db.commit()
-        print("Добавлено " + str(i))
-        i = i + 1
+            cur.execute("""INSERT INTO Triangle_Kino (RESURS, NAME, OPISANIE, LINK_STR) VALUES (?, ?, ?, ?);""",
+                        (resursZERO, name1, opisanie1, link2))
+            db.commit()
+            print("Добавлено " + str(i))
+            i = i + 1
+        x = x + 1
+        url = f"http://hdrezkabbsm2k.net/{str(x)}/?filter=last&genre=1"
+        if x==1000:
+            break
+    except Exception as e:
+        print(e)
+        x = x + 1
 
-    x = x + 1
+        url = f"http://hdrezkabbsm2k.net/{str(x)}/?filter=last&genre=1"
 
-    url = f"http://hdrezkabbsm2k.net/{str(x)}/?filter=last&genre=1"
-
-    if x == 1008:
-        break
+        if x == 1008:
+            break
