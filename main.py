@@ -49,30 +49,38 @@ while True:
             print(url)
             link1_list.append(url)
             name_list.append(name_text)
-
         for link0 in link1_list:
-            time.sleep(0.01)
-            page2 = BeautifulSoup(requests.get(link0, headers=headers).text, "lxml")
-            opisanie = page2.find("div", class_="b-post__description_text").text
+            try:
+                time.sleep(0.01)
+                page2 = BeautifulSoup(requests.get(link0, headers=headers).text, "lxml")
+                opisanie = page2.find("div", class_="b-post__description_text").text
+                
+                print(opisanie)
 
-            print(opisanie)
-
-            options = Options()
-            options.add_argument("--headless")
-            time.sleep(0.01)
-            driver = webdriver.Chrome(options=options,executable_path="home/dartmoney/MY_BOT/FILMS_BOT/chromedriver")
-
+                options = Options()
+                options.add_argument("--headless")
+                time.sleep(0.01)
+                try:
+                    driver = webdriver.Chrome(options=options,executable_path="home/dartmoney/MY_BOT/FILMS_BOT/chromedriver")
         # Go to the Google home page
-            driver.get(link0)
+                    driver.get(link0)
         # Access requests via the `requests` attribute
-            for request in driver.requests:
-                if request.response:
-                    if "http://stream.voidboost.cc/" in request.url:
-                        req.append(
-                            request.url
-                        )
-
-            opisanie_list.append(opisanie)
+                    for request in driver.requests:
+                        if request.response:
+                            if "http://stream.voidboost.cc/" in request.url:
+                                req.append(
+                                    request.url
+                                )
+                    driver.stop()
+                    time.sleep(0.01)
+                    driver.close()
+                    opisanie_list.append(opisanie)
+                except:
+                    driver.stop()
+                    time.sleep(0.01)
+                    driver.close()
+            except:
+                continue
         while i < len(opisanie_list):
             name1 = name_list[i]
             opisanie1 = opisanie_list[i]
