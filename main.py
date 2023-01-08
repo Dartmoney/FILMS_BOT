@@ -35,6 +35,8 @@ x = 1
 url = "http://hdrezkabbsm2k.net/?filter=last&genre=1"
 while True:
     try:
+        user_agent = random.choice(user_agent_list)
+        headers = {'User-Agent': user_agent}
         i = 0
         time.sleep(0.01)
         req = []
@@ -49,57 +51,63 @@ while True:
             print(url)
             link1_list.append(url)
             name_list.append(name_text)
-        for link0 in link1_list:
-            try:
-                time.sleep(0.01)
-                page2 = BeautifulSoup(requests.get(link0, headers=headers).text, "lxml")
-                opisanie = page2.find("div", class_="b-post__description_text").text
+    except Exception as e:
+        with open("eror.txt","w") as s:
+            s.write(str(e))
+    for link0 in link1_list:
+        try:
+            time.sleep(0.01)
+            page2 = BeautifulSoup(requests.get(link0, headers=headers).text, "lxml")
+            opisanie = page2.find("div", class_="b-post__description_text").text
                 
-                print(opisanie)
+            print(opisanie)
 
-                options = Options()
-                options.add_argument("--headless")
-                time.sleep(0.01)
-                try:
-                    driver = webdriver.Chrome(options=options,executable_path="home/dartmoney/MY_BOT/FILMS_BOT/chromedriver")
+            options = Options()
+            options.add_argument("--headless")
+            time.sleep(0.01)
+            try:
+                driver = webdriver.Chrome(options=options,executable_path="home/dartmoney/MY_BOT/FILMS_BOT/chromedriver")
         # Go to the Google home page
-                    driver.get(link0)
+                driver.get(link0)
         # Access requests via the `requests` attribute
-                    for request in driver.requests:
-                        if request.response:
-                            if "http://stream.voidboost.cc/" in request.url:
-                                req.append(
-                                    request.url
-                                )
-                    driver.stop()
-                    time.sleep(0.01)
-                    driver.close()
-                    opisanie_list.append(opisanie)
-                except:
-                    driver.stop()
-                    time.sleep(0.01)
-                    driver.close()
-            except:
-                continue
+                for request in driver.requests:
+                    if request.response:
+                        if ".stream.voidboost.cc/" in request.url:
+                            req.append(
+                                request.url
+                            )
+                time.sleep(0.01)
+                driver.quit()
+                opisanie_list.append(opisanie)
+            except Exception as e:
+                print(e)
+                with open("eror.txt","w") as s:
+                    s.write(str(e))
+                time.sleep(0.01)
+                driver.close()
+        except Exception as e:
+            print(e)
+            with open("eror.txt", "w") as s:
+                s.write(str(e))
+    try:
         while i < len(opisanie_list):
             name1 = name_list[i]
             opisanie1 = opisanie_list[i]
             link2 = req[i]
-
             cur.execute("""INSERT INTO Triangle_Kino (RESURS, NAME, OPISANIE, LINK_STR) VALUES (?, ?, ?, ?);""",
                         (resursZERO, name1, opisanie1, link2))
             db.commit()
             print("Добавлено " + str(i))
             i = i + 1
         x = x + 1
-        url = f"http://hdrezkabbsm2k.net/{str(x)}/?filter=last&genre=1"
-        if x==1000:
+        url = f"http://hdrezkabbsm2k.net/page/{x}/?filter=last&genre=1"
+        if x==1008:
             break
     except Exception as e:
-        print(e)
-        x = x + 1
-
-        url = f"http://hdrezkabbsm2k.net/{str(x)}/?filter=last&genre=1"
-
-        if x == 1008:
-            break
+        with open("eror.txt", "w") as s:
+            s.write(str(e))
+            print(e)
+            x = x + 1
+            url = f"http://hdrezkabbsm2k.net/page/{x}/?filter=last&genre=1"
+            if x == 1008:
+                break
