@@ -8,6 +8,43 @@ db = sqlite3.connect("Triangle_Kino.db")
 cur = db.cursor()
 proxy = dict(https='socks5://159.203.13.82:46202')
 
+
+def get_free_proxies():
+    url = "https://free-proxy-list.net/"
+    # получаем ответ HTTP и создаем объект soup
+    soup = BeautifulSoup(requests.get(url).content, "html.parser")
+    proxies = []
+    for row in soup.find("table", attrs={"id": "proxylisttable"}).find_all("tr")[1:]:
+        tds = row.find_all("td")
+        try:
+            ip = tds[0].text.strip()
+            port = tds[1].text.strip()
+            host = f"{ip}:{port}"
+            proxies.append(host)
+        except IndexError:
+            continue
+    return proxies
+
+
+def get_session(proxies):
+    # создать HTTP‑сеанс
+    session = requests.Session()
+    # выбираем один случайный прокси
+    proxy = random.choice(proxies)
+    session.proxies = {"http": proxy, "https": proxy}
+    return session
+
+
+def get_session(proxies):
+    # создать HTTP‑сеанс
+    session = requests.Session()
+    # выбираем один случайный прокси
+    proxy = random.choice(proxies)
+
+    session.proxies = {"http": proxy, "https": proxy}
+    return session
+
+
 cur.execute("""CREATE TABLE IF NOT EXISTS Triangle_Kino (
     ID INTEGER PRIMARY KEY,
     RESURS TEXT,
@@ -36,9 +73,16 @@ x = 1
 def req(k, x=0, url="https://rezka.ag/?filter=last&genre=1"):
     user_agent = random.choice(user_agent_list)
     while True:
+        s = get_session(get_free_proxies())
+        try:
+            print("Страница запроса с IP:", s.get("http://icanhazip.com", timeout=1.5).text.strip())
+            break
+        except Exception as e:
+            continue
+    while True:
         headers = {'User-Agent': user_agent}
         i = 0
-        page = BeautifulSoup(requests.get(url, headers=headers, proxies=proxy).text, "lxml")
+        page = BeautifulSoup(requests.get(url, headers=headers).text, "lxml")
         name_list = []
         link1_list = []
         opisanie_list = []
@@ -51,7 +95,7 @@ def req(k, x=0, url="https://rezka.ag/?filter=last&genre=1"):
             name_list.append(name_text)
 
         for link0 in link1_list:
-            page2 = BeautifulSoup(requests.get(link0, headers=headers, proxies=proxy).text, "lxml")
+            page2 = BeautifulSoup(requests.get(link0, headers=headers).text, "lxml")
             opisanie = page2.find("div", class_="b-post__description_text").text
             print(opisanie)
 
