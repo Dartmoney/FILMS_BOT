@@ -6,43 +6,8 @@ from multiprocessing import Process
 
 db = sqlite3.connect("Triangle_Kino.db")
 cur = db.cursor()
-proxy = dict(https='socks5://159.203.13.82:46202')
 
-
-def get_free_proxies():
-    url = "https://free-proxy-list.net/"
-    # получаем ответ HTTP и создаем объект soup
-    soup = BeautifulSoup(requests.get(url).content, "html.parser")
-    proxies = []
-    for row in soup.find("table", attrs={"id": "proxylisttable"}).find_all("tr")[1:]:
-        tds = row.find_all("td")
-        try:
-            ip = tds[0].text.strip()
-            port = tds[1].text.strip()
-            host = f"{ip}:{port}"
-            proxies.append(host)
-        except IndexError:
-            continue
-    return proxies
-
-
-def get_session(proxies):
-    # создать HTTP‑сеанс
-    session = requests.Session()
-    # выбираем один случайный прокси
-    proxy = random.choice(proxies)
-    session.proxies = {"http": proxy, "https": proxy}
-    return session
-
-
-def get_session(proxies):
-    # создать HTTP‑сеанс
-    session = requests.Session()
-    # выбираем один случайный прокси
-    proxy = random.choice(proxies)
-
-    session.proxies = {"http": proxy, "https": proxy}
-    return session
+# proxy = dict(https='socks5://159.203.13.82:46202')
 
 
 cur.execute("""CREATE TABLE IF NOT EXISTS Triangle_Kino (
@@ -68,17 +33,12 @@ user_agent_list = [
 ]
 
 x = 1
+Tek_mirror = "http://hdrezkasagmey.net"
 
 
-def req(k, x=0, url="https://rezka.ag/?filter=last&genre=1"):
+def req(k, x=0, url=f"{Tek_mirror}?filter=last&genre=1"):
     user_agent = random.choice(user_agent_list)
-    while True:
-        s = get_session(get_free_proxies())
-        try:
-            print("Страница запроса с IP:", s.get("http://icanhazip.com", timeout=1.5).text.strip())
-            break
-        except Exception as e:
-            continue
+
     while True:
         headers = {'User-Agent': user_agent}
         i = 0
@@ -111,7 +71,7 @@ def req(k, x=0, url="https://rezka.ag/?filter=last&genre=1"):
             print("Добавлено " + str(i))
             i = i + 1
         x = x + 1
-        url = f"https://rezka.ag/page/{x}/?filter=last&genre=1"
+        url = f"{Tek_mirror}/page/{x}/?filter=last&genre=1"
         if x == k:
             break
 
@@ -119,23 +79,23 @@ def req(k, x=0, url="https://rezka.ag/?filter=last&genre=1"):
 if __name__ == '__main__':
     p1 = Process(target=req(100))
     p1.start()
-    p2 = Process(target=req(200, x=101, url="https://rezka.ag/page/101/?filter=last&genre=1"))
+    p2 = Process(target=req(200, x=101, url=f"{Tek_mirror}/page/101/?filter=last&genre=1"))
     p2.start()
-    p3 = Process(target=req(300, x=201, url="https://rezka.ag/page/201/?filter=last&genre=1"))
+    p3 = Process(target=req(300, x=201, url=f"{Tek_mirror}/page/201/?filter=last&genre=1"))
     p3.start()
-    p4 = Process(target=req(400, x=301, url="https://rezka.ag/page/301/?filter=last&genre=1"))
+    p4 = Process(target=req(400, x=301, url=f"{Tek_mirror}/page/301/?filter=last&genre=1"))
     p4.start()
-    p5 = Process(target=req(500, x=401, url="https://rezka.ag/page/401/?filter=last&genre=1"))
+    p5 = Process(target=req(500, x=401, url=f"{Tek_mirror}/page/401/?filter=last&genre=1"))
     p5.start()
-    p6 = Process(target=req(600, x=501, url="https://rezka.ag/page/501/?filter=last&genre=1"))
+    p6 = Process(target=req(600, x=501, url=f"{Tek_mirror}/page/501/?filter=last&genre=1"))
     p6.start()
-    p7 = Process(target=req(700, x=601, url="https://rezka.ag/page/601/?filter=last&genre=1"))
+    p7 = Process(target=req(700, x=601, url=f"{Tek_mirror}/page/601/?filter=last&genre=1"))
     p7.start()
-    p8 = Process(target=req(800, x=701, url="https://rezka.ag/page/701/?filter=last&genre=1"))
+    p8 = Process(target=req(800, x=701, url=f"{Tek_mirror}/page/701/?filter=last&genre=1"))
     p8.start()
-    p9 = Process(target=req(900, x=801, url="https://rezka.ag/page/801/?filter=last&genre=1"))
+    p9 = Process(target=req(900, x=801, url=f"{Tek_mirror}/page/801/?filter=last&genre=1"))
     p9.start()
-    p10 = Process(target=req(1009, x=901, url="https://rezka.ag/page/901/?filter=last&genre=1"))
+    p10 = Process(target=req(1009, x=901, url=f"{Tek_mirror}/page/901/?filter=last&genre=1"))
     p10.start()
     p1.join()
     p2.join()
