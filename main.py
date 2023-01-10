@@ -3,13 +3,10 @@ import requests
 import random
 import sqlite3
 from multiprocessing import Process
+import time
 
 db = sqlite3.connect("Triangle_Kino.db")
 cur = db.cursor()
-
-# proxy = dict(https='socks5://159.203.13.82:46202')
-
-
 cur.execute("""CREATE TABLE IF NOT EXISTS Triangle_Kino (
     ID INTEGER PRIMARY KEY,
     RESURS TEXT,
@@ -32,44 +29,55 @@ user_agent_list = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.5249.119 Safari/537.36"
 ]
 
-x = 1
-Tek_mirror = "http://hdrezkasagmey.net"
+Tek_mirror = "http://hdrezka443rtt.net"
 
 
 def req(k, x=0, url=f"{Tek_mirror}?filter=last&genre=1"):
     user_agent = random.choice(user_agent_list)
 
     while True:
-        headers = {'User-Agent': user_agent}
-        i = 0
-        page = BeautifulSoup(requests.get(url, headers=headers).text, "lxml")
-        name_list = []
-        link1_list = []
-        opisanie_list = []
-        for name in page.find_all("div", class_="b-content__inline_item-link"):
-            name_text = name.text
-            url = name.find_all('a')[0].get("href")
-            print(name_text)
-            print(url)
-            link1_list.append(url)
-            name_list.append(name_text)
-
+        try:
+            headers = {'User-Agent': user_agent}
+            i = 0
+            time.sleep(0.01)
+            page = BeautifulSoup(requests.get(url, headers=headers).text, "lxml")
+            name_list = []
+            link1_list = []
+            opisanie_list = []
+        except:
+            continue
+        try:
+            for name in page.find_all("div", class_="b-content__inline_item-link"):
+                name_text = name.text
+                url = name.find_all('a')[0].get("href")
+                print(name_text)
+                print(url)
+                link1_list.append(url)
+                name_list.append(name_text)
+        except:
+            continue
         for link0 in link1_list:
-            page2 = BeautifulSoup(requests.get(link0, headers=headers).text, "lxml")
-            opisanie = page2.find("div", class_="b-post__description_text").text
-            print(opisanie)
-
-        while i < len(opisanie_list):
-            if not (((i + 1) < len(name_list)) and ((i + 1) < len(link1_list)) and ((i + 1) < len(opisanie_list))):
+            try:
+                time.sleep(0.01)
+                page2 = BeautifulSoup(requests.get(link0, headers=headers).text, "lxml")
+                opisanie = page2.find("div", class_="b-post__description_text").text
+                print(opisanie)
+            except:
                 continue
-            name1 = name_list[i]
-            opisanie1 = opisanie_list[i]
-            link2 = link1_list[i]
-            cur.execute("""INSERT INTO Triangle_Kino (RESURS, NAME, OPISANIE, LINK_STR) VALUES (?, ?, ?, ?);""",
-                        (resursZERO, name1, opisanie1, link2))
-            db.commit()
-            print("Добавлено " + str(i))
-            i = i + 1
+        while i < len(opisanie_list):
+            try:
+                if not (((i + 1) < len(name_list)) and ((i + 1) < len(link1_list)) and ((i + 1) < len(opisanie_list))):
+                    continue
+                name1 = name_list[i]
+                opisanie1 = opisanie_list[i]
+                link2 = link1_list[i]
+                cur.execute("""INSERT INTO Triangle_Kino (RESURS, NAME, OPISANIE, LINK_STR) VALUES (?, ?, ?, ?);""",
+                            (resursZERO, name1, opisanie1, link2))
+                db.commit()
+                print("Добавлено " + str(i))
+                i = i + 1
+            except:
+                continue
         x = x + 1
         url = f"{Tek_mirror}/page/{x}/?filter=last&genre=1"
         if x == k:
