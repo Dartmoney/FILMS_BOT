@@ -144,7 +144,6 @@ Tek_mirror = "http://hdrezka443rtt.net/"
 
 
 def req(k, x=1, url=f"{Tek_mirror}?filter=last&genre=1"):
-    user_agent = random.choice(user_agent_list)
     while True:
         s = get_session(proxy)
         try:
@@ -153,6 +152,7 @@ def req(k, x=1, url=f"{Tek_mirror}?filter=last&genre=1"):
         except Exception as e:
             continue
     while True:
+        user_agent = random.choice(user_agent_list)
         headers = {'User-Agent': user_agent}
         i = 0
         time.sleep(0.01)
