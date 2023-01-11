@@ -144,12 +144,11 @@ Tek_mirror = "http://hdrezka443rtt.net/"
 
 
 def req(k, x=1, url=f"{Tek_mirror}?filter=last&genre=1"):
-    k = 0
-    while k != 1:
+    for i in range(300):
         s = get_session(proxy)
         try:
             print("Страница запроса с IP:", s.get("http://icanhazip.com", timeout=1.5).text.strip())
-            k = 1
+            break
         except Exception as e:
             continue
     while True:
@@ -160,12 +159,11 @@ def req(k, x=1, url=f"{Tek_mirror}?filter=last&genre=1"):
         try:
             page = BeautifulSoup(requests.get(url, headers=headers).text, "lxml")
         except:
-            k = 0
-            while k != 1:
+            for i in range(300):
                 s = get_session(proxy)
                 try:
                     print("Страница запроса с IP:", s.get("http://icanhazip.com", timeout=1.5).text.strip())
-                    k = 1
+                    break
                 except Exception as e:
                     continue
         name_list = []
@@ -186,12 +184,11 @@ def req(k, x=1, url=f"{Tek_mirror}?filter=last&genre=1"):
             try:
                 page2 = BeautifulSoup(requests.get(link0, headers=headers).text, "lxml")
             except:
-                k = 0
-                while k != 1:
+                for i in range(300):
                     s = get_session(proxy)
                     try:
                         print("Страница запроса с IP:", s.get("http://icanhazip.com", timeout=1.5).text.strip())
-                        k = 1
+                        break
                     except Exception as e:
                         continue
             try:
