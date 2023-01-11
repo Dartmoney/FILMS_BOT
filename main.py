@@ -140,7 +140,7 @@ def get_session(proxies):
 proxy = get_free_proxies()
 
 x = 1
-Tek_mirror = "http://hdrezka443rtt.net/"
+Tek_mirror = "http://hdrezka77ftyy.net/"
 
 
 def req(k, x=1, url=f"{Tek_mirror}?filter=last&genre=1"):
@@ -150,12 +150,12 @@ def req(k, x=1, url=f"{Tek_mirror}?filter=last&genre=1"):
             print("Страница запроса с IP:", s.get("http://icanhazip.com", timeout=1.5).text.strip())
             break
         except Exception as e:
-            continue
+            ...
     while True:
         user_agent = random.choice(user_agent_list)
         headers = {'User-Agent': user_agent}
-        i = 0
-        time.sleep(0.01)
+
+        time.sleep(random.uniform(0, 1))
         try:
             page = BeautifulSoup(requests.get(url, headers=headers).text, "lxml")
         except:
@@ -165,12 +165,13 @@ def req(k, x=1, url=f"{Tek_mirror}?filter=last&genre=1"):
                     print("Страница запроса с IP:", s.get("http://icanhazip.com", timeout=1.5).text.strip())
                     break
                 except Exception as e:
-                    continue
+                    ...
         name_list = []
         link1_list = []
         opisanie_list = []
         print(page)
-        print(page.find_all("div", class_="b-content__inline_item-link"))
+        if "503 Service Temporarily Unavailable" in page:
+            continue
         for name in page.find_all("div", class_="b-content__inline_item-link"):
             name_text = name.text
             url = name.find_all('a')[0].get("href")
@@ -180,7 +181,7 @@ def req(k, x=1, url=f"{Tek_mirror}?filter=last&genre=1"):
             name_list.append(name_text)
 
         for link0 in link1_list:
-            time.sleep(0.01)
+            time.sleep(random.randint(0, 2))
             try:
                 page2 = BeautifulSoup(requests.get(link0, headers=headers).text, "lxml")
             except:
@@ -190,15 +191,15 @@ def req(k, x=1, url=f"{Tek_mirror}?filter=last&genre=1"):
                         print("Страница запроса с IP:", s.get("http://icanhazip.com", timeout=1.5).text.strip())
                         break
                     except Exception as e:
-                        continue
+                        ...
             try:
                 opisanie = page2.find("div", class_="b-post__description_text").text
+                opisanie_list.append(opisanie)
                 print(opisanie)
             except:
-                continue
+                ...
+        i = 0
         while i < len(opisanie_list):
-            if not (((i + 1) < len(name_list)) and ((i + 1) < len(link1_list)) and ((i + 1) < len(opisanie_list))):
-                continue
             name1 = name_list[i]
             opisanie1 = opisanie_list[i]
             link2 = link1_list[i]
@@ -213,34 +214,4 @@ def req(k, x=1, url=f"{Tek_mirror}?filter=last&genre=1"):
             break
 
 
-if __name__ == '__main__':
-    p1 = Process(target=req(100))
-    p1.start()
-    p2 = Process(target=req(200, x=101, url=f"{Tek_mirror}/page/101/?filter=last&genre=1"))
-    p2.start()
-    p3 = Process(target=req(300, x=201, url=f"{Tek_mirror}/page/201/?filter=last&genre=1"))
-    p3.start()
-    p4 = Process(target=req(400, x=301, url=f"{Tek_mirror}/page/301/?filter=last&genre=1"))
-    p4.start()
-    p5 = Process(target=req(500, x=401, url=f"{Tek_mirror}/page/401/?filter=last&genre=1"))
-    p5.start()
-    p6 = Process(target=req(600, x=501, url=f"{Tek_mirror}/page/501/?filter=last&genre=1"))
-    p6.start()
-    p7 = Process(target=req(700, x=601, url=f"{Tek_mirror}/page/601/?filter=last&genre=1"))
-    p7.start()
-    p8 = Process(target=req(800, x=701, url=f"{Tek_mirror}/page/701/?filter=last&genre=1"))
-    p8.start()
-    p9 = Process(target=req(900, x=801, url=f"{Tek_mirror}/page/801/?filter=last&genre=1"))
-    p9.start()
-    p10 = Process(target=req(1009, x=901, url=f"{Tek_mirror}/page/901/?filter=last&genre=1"))
-    p10.start()
-    p1.join()
-    p2.join()
-    p3.join()
-    p4.join()
-    p5.join()
-    p6.join()
-    p7.join()
-    p8.join()
-    p9.join()
-    p10.join()
+req(1009)
