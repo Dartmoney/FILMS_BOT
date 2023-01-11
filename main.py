@@ -165,7 +165,7 @@ def req(k, x=1, url=f"{Tek_mirror}?filter=last&genre=1"):
                 s = get_session(proxy)
                 try:
                     print("Страница запроса с IP:", s.get("http://icanhazip.com", timeout=1.5).text.strip())
-                    break
+                    k = 1
                 except Exception as e:
                     continue
         name_list = []
@@ -191,7 +191,7 @@ def req(k, x=1, url=f"{Tek_mirror}?filter=last&genre=1"):
                     s = get_session(proxy)
                     try:
                         print("Страница запроса с IP:", s.get("http://icanhazip.com", timeout=1.5).text.strip())
-                        break
+                        k = 1
                     except Exception as e:
                         continue
             try:
