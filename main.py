@@ -179,7 +179,7 @@ def req(k, x=1, url=f"{Tek_mirror}?filter=last&genre=1"):
             print(url)
             link1_list.append(url)
             name_list.append(name_text)
-
+        print("ti kto")
         for link0 in link1_list:
             time.sleep(random.randint(0, 2))
             try:

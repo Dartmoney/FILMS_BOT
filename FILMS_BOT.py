@@ -94,7 +94,7 @@ async def random(message: types.Message):
     con.commit()
     con.close()
     await message.reply(res[0][1] + " " + res[0][2] + " " + res[0][3], reply_markup=kbM)
-
+    print("ti kto")
     @dp.callback_query_handler(text="downloads")
     async def dowmloads(query: types.CallbackQuery):
         global res
