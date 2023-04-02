@@ -14,7 +14,7 @@ import urllib.request
 from aiogram.bot.api import TelegramAPIServer
 
 # подключаемся к локальному АПИ телеграм
-local_server = TelegramAPIServer.from_base('http://localhost:22')
+local_server = TelegramAPIServer.from_base('http://localhost:127')
 # передаем значение токена
 API_TOKEN = API
 # хранение всего в Оперативке (после перезагрузки все состояния для бота стираются)
@@ -69,9 +69,14 @@ async def random(message: types.Message):
                                                 """)
     # цикл для редактирования и занесения данных в список
     for i in result:
-        print(i)
-        # добавление в список ответа и изменение ссылки с поправкой на текущее зеркало
-        res.append([i[0], i[2], i[3], (tek_miror + "/films/" + i[4].split("/films/")[1])])
+        if "animation" in i[4]:
+            res.append([i[0], i[2], i[3], (tek_miror + "/animation/" + i[4].split("/animation/")[1])])
+        elif "/films/" in i[4]:
+            res.append([i[0], i[2], i[3], (tek_miror + "/films/" + i[4].split("/films/")[1])])
+        elif "cartoons" in i[4]:
+            res.append([i[0], i[2], i[3], (tek_miror + "/cartoons/" + i[4].split("/cartoons/")[1])])
+        elif "series" in i[4]:
+            res.append([i[0], i[2], i[3], (tek_miror + "/series/" + i[4].split("/series/")[1])])
     # создание инлайн клавиатуры
     kbM = types.InlineKeyboardMarkup(row_width=1)
     # добавлени кнопки для скачивания фильма
@@ -120,48 +125,68 @@ async def random(message: types.Message):
             Path.unlink(Path("/tmpfs/" + str(query.message.chat.id) + ".mp4"))
             time.sleep(60)
 
-# условие припоискуе по описанию
-if opisanie:
-    # спсиок для получения ответов с бд
+
+#  Инлайн клавиатура
+kbM = types.InlineKeyboardMarkup(row_width=5)
+# кнопка которая отправляет пользователя к первому фильму
+first = types.InlineKeyboardButton(text='<<', callback_data="perv")
+#  кнопка отправляет пользователя к предыдущему фильму
+pred = types.InlineKeyboardButton(text="<", callback_data="pred")
+# кнопка для скачивания фильма
+download = types.InlineKeyboardButton(text="скачать", callback_data="download")
+# кнопка для перехода к следующему фильму
+sled = types.InlineKeyboardButton(text=">", callback_data="sled")
+# кнопка для перехода к последнему фильму
+posl = types.InlineKeyboardButton(text=">>", callback_data="posl")
+# добавление всех кнопок в клавиатуру
+kbM.add(first, pred, download, sled, posl)
+
+
+# обработчик при получении сообщения
+@dp.message_handler()
+async def message_from(message: types.Message):
+    global res
+    global k
+    global kbm
     res = []
     k = 0
-    #  Инлайн клавиатура
-    kbM = types.InlineKeyboardMarkup(row_width=5)
-    # кнопка которая отправляет пользователя к первому фильму
-    first = types.InlineKeyboardButton(text='<<', callback_data="perv")
-    #  кнопка отправляет пользователя к предыдущему фильму
-    pred = types.InlineKeyboardButton(text="<", callback_data="pred")
-    # кнопка для скачивания фильма
-    download = types.InlineKeyboardButton(text="скачать", callback_data="download")
-    # кнопка для перехода к следующему фильму
-    sled = types.InlineKeyboardButton(text=">", callback_data="sled")
-    # кнопка для перехода к последнему фильму
-    posl = types.InlineKeyboardButton(text=">>", callback_data="posl")
-    # добавление всех кнопок в клавиатуру
-    kbM.add(first, pred, download, sled, posl)
-
-
-    # обработчик при получении сообщения
-    @dp.message_handler()
-    async def message_from(message: types.Message):
-        global res
-        global k
-        global kbM
-        global tek_miror
-        # текст сообщения
-        p = message.text
-        con = sqlite3.connect("Triangle_Kino.db")
-        cur = con.cursor()
+    # текст сообщения
+    p = message.text
+    con = sqlite3.connect("Triangle_Kino.db")
+    cur = con.cursor()
+    # условие поиска по описанию или по названию
+    if opisanie:
         result = cur.execute(f"""
-                                            SELECT * FROM Triangle_Kino 
-                                            WHERE OPISANIE LIKE ?""", ("%" + p + "%",))
+        SELECT * FROM Triangle_Kino 
+        WHERE OPISANIE LIKE ?""", ("%" + p + "%",))
+        # редактируем результаты а после передаем их в список
         for i in result:
-            res.append([i[0], i[2], i[3], (tek_miror + "/films/" + i[4].split("/films/")[1])])
-        print(res)
-        await message.reply(res[k][1] + " " + res[k][2] + " " + res[k][3], reply_markup=kbM)
-        con.commit()
-        con.close()
+            if "animation" in i[4]:
+                res.append([i[0], i[2], i[3], (tek_miror + "/animation/" + i[4].split("/animation/")[1])])
+            elif "/films/" in i[4]:
+                res.append([i[0], i[2], i[3], (tek_miror + "/films/" + i[4].split("/films/")[1])])
+            elif "cartoons" in i[4]:
+                res.append([i[0], i[2], i[3], (tek_miror + "/cartoons/" + i[4].split("/cartoons/")[1])])
+            elif "series" in i[4]:
+                res.append([i[0], i[2], i[3], (tek_miror + "/series/" + i[4].split("/series/")[1])])
+    else:
+            result = cur.execute(f"""
+                                    SELECT * FROM Triangle_Kino 
+                                    WHERE NAME LIKE ?""", ("%" + p + "%",))
+            for i in result:
+                if "animation" in i[4]:
+                    res.append([i[0], i[2], i[3], (tek_miror + "/animation/" + i[4].split("/animation/")[1])])
+                elif "/films/" in i[4]:
+                    res.append([i[0], i[2], i[3], (tek_miror + "/films/" + i[4].split("/films/")[1])])
+                elif "cartoons" in i[4]:
+                    res.append([i[0], i[2], i[3], (tek_miror + "/cartoons/" + i[4].split("/cartoons/")[1])])
+                elif "series" in i[4]:
+                    res.append([i[0], i[2], i[3], (tek_miror + "/series/" + i[4].split("/series/")[1])])
+    print(res)
+    con.commit()
+    con.close()
 
+    await message.reply(res[k][1] + " " + res[k][2] + " " + res[k][3], reply_markup=kbM)
 
     # обработчик при нажатии кнопки следующего фильма
     @dp.callback_query_handler(text="sled")
@@ -170,9 +195,9 @@ if opisanie:
         global k
         global kbM
         k += 1
+
         if k < len(res):
             await query.message.edit_text(res[k][1] + " " + res[k][2] + " " + res[k][3], reply_markup=kbM)
-
 
     # кнопка для предыдущего фильма
     @dp.callback_query_handler(text="pred")
@@ -184,7 +209,6 @@ if opisanie:
             k -= 1
             await query.message.edit_text(res[k][1] + " " + res[k][2] + " " + res[k][3], reply_markup=kbM)
 
-
     # кнопка для первого фильма
     @dp.callback_query_handler(text="perv")
     async def perv(query: types.CallbackQuery):
@@ -193,7 +217,6 @@ if opisanie:
         global kbM
         k = 0
         await query.message.edit_text(res[k][1] + " " + res[k][2] + " " + res[k][3], reply_markup=kbM)
-
 
     # кнопка для последнего фильма
     @dp.callback_query_handler(text="posl")
@@ -204,26 +227,33 @@ if opisanie:
         k = len(res) - 1
         await query.message.edit_text(res[k][1] + " " + res[k][2] + " " + res[k][3], reply_markup=kbM)
 
-
     # кнопка для скачивания
     @dp.callback_query_handler(text="download")
-    async def dowmload(query: types.CallbackQuery):
+    async def download(query: types.CallbackQuery):
         global res
         global k
         global kbM
         options = Options()
         options.add_argument("--headless")
         # Go to the Google home page
-        driver = webdriver.Chrome(options=options, executable_path="home/dartmoney/MY_BOT/FILMS_BOT/chromedriver")
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        print("zapros")
+        try:
+            driver = webdriver.Chrome("/D/FILMS_BOT/chromedriver",options=options)
+        except Exception as e:
+            print(e)
+        print("zapros")
         driver.get(res[k][3])
         oshibka = True
+        print("zapros")
         try:
             # Access requests via the `requests` attribute
             for request in driver.requests:
                 if request.response:
                     if ".stream.voidboost.cc/" in request.url:
                         urllib.request.urlretrieve((((request.url).split("mp4"))[0] + "mp4"),
-                                                   "/tmpfs/" + str(query.message.chat.id) + ".mp4")
+                                                   str(query.message.chat.id) + ".mp4")
                         time.sleep(60)
                         break
         except:
@@ -231,113 +261,11 @@ if opisanie:
             await query.message.reply("ошибка")
         driver.quit()
         if oshibka:
-            video = open("/tmpfs/" + str(query.message.chat.id) + ".mp4", 'rb')
+            video = open(str(query.message.chat.id) + ".mp4", 'rb')
             await bot.send_video(chat_id=query.message.chat.id, video=video)
             video.close()
-            Path.unlink(Path("/tmpfs/" + str(query.message.chat.id) + ".mp4"))
             time.sleep(60)
-# то же самое только для поиска фильма по названию
-else:
-    res = []
-    k = 0
-    kbM = types.InlineKeyboardMarkup(row_width=5)
-    first = types.InlineKeyboardButton(text='<<', callback_data="perv")
-    pred = types.InlineKeyboardButton(text="<", callback_data="pred")
-    download = types.InlineKeyboardButton(text="скачать", callback_data="download")
-    sled = types.InlineKeyboardButton(text=">", callback_data="sled")
-    posl = types.InlineKeyboardButton(text=">>", callback_data="posl")
-    kbM.add(first, pred, download, sled, posl)
 
-
-    @dp.message_handler()
-    async def message_from(message: types.Message):
-        global res
-        global k
-        global kbM
-        global tek_miror
-        p = message.text
-        con = sqlite3.connect("Triangle_Kino.db")
-        cur = con.cursor()
-        result = cur.execute(f"""
-                                            SELECT * FROM Triangle_Kino 
-                                            WHERE NAME LIKE ?""", ("%" + p + "%",))
-        for i in result:
-            res.append([i[0], i[2], i[3], (tek_miror + "/films/" + i[4].split("/films/")[1])])
-
-        print(res)
-        await message.reply(res[k][1] + " " + res[k][2] + " " + res[k][3], reply_markup=kbM)
-        con.commit()
-        con.close()
-
-
-    @dp.callback_query_handler(text="sled")
-    async def sled(query: types.CallbackQuery):
-        global res
-        global k
-        global kbM
-        k += 1
-        if k < len(res):
-            await query.message.edit_text(res[k][1] + " " + res[k][2] + " " + res[k][3], reply_markup=kbM)
-
-
-    @dp.callback_query_handler(text="pred")
-    async def pred(query: types.CallbackQuery):
-        global res
-        global k
-        global kbM
-        if (k - 1) >= 0:
-            k -= 1
-            await query.message.edit_text(res[k][1] + " " + res[k][2] + " " + res[k][3], reply_markup=kbM)
-
-
-    @dp.callback_query_handler(text="perv")
-    async def perv(query: types.CallbackQuery):
-        global res
-        global k
-        global kbM
-        k = 0
-        await query.message.edit_text(res[k][1] + " " + res[k][2] + " " + res[k][3], reply_markup=kbM)
-
-
-    @dp.callback_query_handler(text="posl")
-    async def posl(query: types.CallbackQuery):
-        global res
-        global k
-        global kbM
-        k = len(res) - 1
-        await query.message.edit_text(res[k][1] + " " + res[k][2] + " " + res[k][3], reply_markup=kbM)
-
-
-    @dp.callback_query_handler(text="download")
-    async def dowmload(query: types.CallbackQuery):
-        global res
-        global k
-        global kbM
-        options = Options()
-        options.add_argument("--headless")
-        # Go to the Google home page
-        driver = webdriver.Chrome(options=options, executable_path="home/dartmoney/MY_BOT/FILMS_BOT/chromedriver")
-        driver.get(res[k][3])
-        oshibka = True
-        try:
-            # Access requests via the `requests` attribute
-            for request in driver.requests:
-                if request.response:
-                    if ".stream.voidboost.cc/" in request.url:
-                        urllib.request.urlretrieve((((request.url).split("mp4"))[0] + "mp4"),
-                                                   "/tmpfs/" + str(query.message.chat.id) + ".mp4")
-                        time.sleep(60)
-                        break
-        except:
-            oshibka = False
-            await query.message.reply("ошибка")
-        driver.quit()
-        if oshibka:
-            video = open("/tmpfs/" + str(query.message.chat.id) + ".mp4", 'rb')
-            await bot.send_video(chat_id=query.message.chat.id, video=video)
-            video.close()
-            Path.unlink(Path("/tmpfs/" + str(query.message.chat.id) + ".mp4"))
-            time.sleep(60)
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
